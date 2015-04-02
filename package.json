@@ -1,0 +1,45 @@
+{
+  "name": "raconteur-crier",
+  "version": "1.0.0",
+  "description": "The Crier is a tool for converting markup (either straight HTML, jade, or jade-and-dust together, my preferred sugar syntax) into a template (a function which can be fed data and resolves itself into a view).",
+  "main": "crier.js",
+  "scripts": {
+    "build": "npm run clean && npm run create && npm run convert",
+    "clean": "npm run clean-build && npm run clean-public",
+    "clean-build": "rm -rf ./lib",
+    "clean-public": "rm -rf ./public",
+    "create": "npm run create-lib",
+    "create-lib": "(mkdir ./lib || true)",
+    "convert": "npm run convert-bare &&  npm run convert-test && npm run convert-coffee",
+    "convert-bare": "./node_modules/.bin/coffee --bare --compile --output ./lib/ src/coffee/bare",
+    "convert-coffee": "./node_modules/.bin/coffee --compile --output ./lib/ src/coffee",
+    "convert-test": "./node_modules/.bin/coffee --compile --output ./test/ src/coffee/test",
+    "test": "npm run build && ./node_modules/.bin/mocha --reporter spec",
+    "prepublish": "npm run build"
+  },
+  "keywords": [
+    "crier",
+    "raconteur",
+    "template",
+    "templating",
+    "dust",
+    "jade"
+  ],
+  "author": "Brekk Bockrath",
+  "license": "ISC",
+  "dependencies": {
+    "promised-io": "~0.3.5",
+    "coffee-script": "~1.9.1",
+    "parkplace": "~0.1.0",
+    "lodash": "~3.6.0",
+    "jade": "~1.9.2",
+    "dustjs-linkedin": "~2.6.2",
+    "rantjs": "~0.9.7",
+    "chalk": "~1.0.0",
+    "wrap-stream": "~2.0.0"
+  },
+  "devDependencies": {
+    "should": "~5.2.0",
+    "mocha": "~2.2.1"
+  }
+}
