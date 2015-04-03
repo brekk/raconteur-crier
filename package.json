@@ -6,8 +6,8 @@
   "scripts": {
     "build": "npm run clean && npm run create && npm run convert",
     "clean": "npm run clean-build && npm run clean-public",
-    "clean-build": "rm -rf ./lib",
-    "clean-public": "rm -rf ./public",
+    "clean-build": "(rm -rf ./lib || true)",
+    "clean-public": "(rm -rf ./public || true)",
     "create": "npm run create-lib",
     "create-lib": "(mkdir ./lib || true)",
     "convert": "npm run convert-bare &&  npm run convert-test && npm run convert-coffee",
@@ -28,14 +28,15 @@
   "author": "Brekk Bockrath",
   "license": "ISC",
   "dependencies": {
-    "promised-io": "~0.3.5",
-    "coffee-script": "~1.9.1",
-    "parkplace": "~0.1.0",
-    "lodash": "~3.6.0",
-    "jade": "~1.9.2",
-    "dustjs-linkedin": "~2.6.2",
-    "rantjs": "~0.9.7",
     "chalk": "~1.0.0",
+    "coffee-script": "~1.9.1",
+    "debug": "^2.1.3",
+    "dustjs-linkedin": "~2.6.2",
+    "jade": "~1.9.2",
+    "lodash": "~3.6.0",
+    "parkplace": "~0.1.0",
+    "promised-io": "~0.3.5",
+    "rantjs": "~0.9.7",
     "wrap-stream": "~2.0.0"
   },
   "devDependencies": {
