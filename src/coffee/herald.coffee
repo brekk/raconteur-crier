@@ -40,7 +40,7 @@ ___.constant 'escapeTabs', (input, spaces=4)->
     regex = new RegExp tabEscape, 'g'
     return JSON.stringify input.replace regex, "\t"
 
-___.constant 'convertFile', (templateName, input, mode, inflate, sugar, spaces)->
+___.constant 'convertFileAsPromise', (templateName, input, mode, inflate, sugar, spaces)->
     self = @
     d = new Deferred()
     inflate = JSON.stringify inflate
@@ -75,7 +75,7 @@ ___.constant 'preWrap', _.once ()->
 ___.constant 'postWrap', _.once ()->
     return "}).call(this);"
 
-___.readable 'export', (opts={})->
+___.readable 'exportAsPromise', (opts={})->
     self = @
     exportPromise = new Deferred()
 
@@ -102,7 +102,7 @@ ___.readable 'export', (opts={})->
             return (lastFile)->
                 if lastFile?
                     carrier += "\n" + lastFile
-                converted = self.convertFile fileName, fileSource, options.mode, options.inflate, options.sugar, options.spaces
+                converted = self.convertFileAsPromise fileName, fileSource, options.mode, options.inflate, options.sugar, options.spaces
                 return converted
         ).value()
 

@@ -38,7 +38,7 @@ ___.readable 'remove', ()->
             return
         return @_files
 
-___.guarded 'readFile', (input, opts={})->
+___.guarded 'readFileAsPromise', (input, opts={})->
     d = new Deferred()
     unless input?
         d.reject new Error "Expected input to be defined."
@@ -51,7 +51,7 @@ ___.guarded 'readFile', (input, opts={})->
             d.resolve read.toString()
     return d
 
-___.readable 'resolve', ()->
+___.readable 'resolveAsPromise', ()->
     self = @
     resolver = new Deferred()
     # map the files into an instruction set
@@ -65,7 +65,7 @@ ___.readable 'resolve', ()->
             fail = (x)->
                 d.reject x
             unless data.raw?
-                self.readFile(file).then success, fail
+                self.readFileAsPromise(file).then success, fail
             return d
     ).value()
     resolve = (content)->
