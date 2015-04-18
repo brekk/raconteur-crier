@@ -102,8 +102,9 @@ ___.readable 'remove', (name, cb)->
     
 
 ___.readable 'removeAsPromise', (name)->
+    self = Crier
     d = new Deferred()
-    @remove name, (error, success)->
+    self.remove name, (error, success)->
         if error?
             d.reject error
             return
@@ -237,17 +238,15 @@ ___.guarded 'loadChain', (prefix, suffix, templateName, inflate, useSugar)->
         mainDeferred.reject err
         return
 
-    
-
     eatFile = (input)->
         debug "eating file", input
         d = postpone()
         if !input?
-            d.reject new Error "File is empty."
+            d.reject new Error "Content is empty (file | raw)."
         else
             output = input.toString()
             if !output? or output.length is 0
-                d.reject new Error "File is empty."
+                d.reject new Error "Content is empty (file | raw)."
                 return d
             d.resolve output
         return d
@@ -298,14 +297,18 @@ ___.guarded 'loadChain', (prefix, suffix, templateName, inflate, useSugar)->
     promise.seq(instructions).then good, bad
     return mainDeferred
 
-___.readable 'loadRawAsPromise', (rawContent, templateName, inflate, useSugar=false)->
+___.readable 'loadRawAsPromise', (rawContent, templateName=null, inflate=false, useSugar=false)->
     self = Crier
     convertSugarToDust = null
     if useSugar
         convertSugarToDust = (input)->
             debug "converting file", input
             return self.convertSugarToDust(input)
-    self.loadChain null, convertSugarToDust, templateName, inflate, useSugar
+    giveRaw = ()->
+        d = new Deferred()
+        d.resolve rawContent
+        return d
+    self.loadChain giveRaw, convertSugarToDust, templateName, inflate, useSugar
 
 
 ###*
