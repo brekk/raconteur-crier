@@ -194,7 +194,7 @@ rantify = (model)->
                     addFileOp.then.should.be.ok
                     happy = (output)->
                         output.should.be.ok
-                        output.should.be.a.Boolean
+                        output.should.be.a.Function
                         done()
                     sad = (e)->
                         throw e

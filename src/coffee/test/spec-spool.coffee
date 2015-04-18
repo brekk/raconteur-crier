@@ -37,7 +37,7 @@ path = require 'path'
                     out = $.remove.apply $, removeTests
                     _(removeTests).each (test)->
                         _(out).contains(test).should.equal false
-            describe '.readFile', ()->
+            describe '.readFileAsPromise', ()->
                 it "should promise to read a given file", (done)->
                     addTests = harness 'add'
                     succeed = (x)->
@@ -46,8 +46,8 @@ path = require 'path'
                     fail = (e)->
                         e.should.not.be.ok
                         done()
-                    $.readFile(addTests[0]).then succeed, fail
-            describe '.resolve', ()->
+                    $.readFileAsPromise(addTests[0]).then succeed, fail
+            describe '.resolveAsPromise', ()->
                 it "should be able to resolve the filenames and convert them to their raw inputs", (done)->
                     addTests = harness 'add'
                     out = $.add.apply $, addTests
@@ -59,7 +59,7 @@ path = require 'path'
                     fail = (e)->
                         e.should.not.be.ok
                         done()
-                    $.resolve().then succeed, fail
+                    $.resolveAsPromise().then succeed, fail
     catch e
         console.warn "Error during spool spec: ", e
         if e.stack?

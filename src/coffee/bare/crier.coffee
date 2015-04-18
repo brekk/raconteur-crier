@@ -14,7 +14,7 @@ postpone = ()->
     d.nay = _.once d.reject
     return d
 
-debug = require('debug') 'raconteur:templater'
+debug = require('debug') 'raconteur:crier'
 
 module.exports = Crier = {}
 
@@ -102,8 +102,9 @@ ___.readable 'remove', (name, cb)->
     
 
 ___.readable 'removeAsPromise', (name)->
+    self = Crier
     d = new Deferred()
-    @remove name, (error, success)->
+    self.remove name, (error, success)->
         if error?
             d.reject error
             return
@@ -223,6 +224,93 @@ ___.readable 'convertSugarToDust', (sugarContent, data, options)->
         if e.stack?
             console.log e.stack
 
+___.guarded 'loadChain', (prefix, suffix, templateName, inflate, useSugar)->
+    self = @
+    # make yo'self a deferred
+    mainDeferred = postpone()
+
+    good = (outcome)->
+        mainDeferred.resolve outcome
+        return
+
+    # right now we reuse this bad callback for all the parts of our possible logic chain
+    bad = (err)->
+        mainDeferred.reject err
+        return
+
+    eatFile = (input)->
+        debug "eating file", input
+        d = postpone()
+        if !input?
+            d.reject new Error "Content is empty (file | raw)."
+        else
+            output = input.toString()
+            if !output? or output.length is 0
+                d.reject new Error "Content is empty (file | raw)."
+                return d
+            d.resolve output
+        return d
+
+    addAsPromise = (content)->
+        debug "adding file as promise", content
+        unless content?
+            mainDeferred.reject new Error 'Expected content but there was none.'
+            return
+        return self.addAsPromise(templateName, content, useSugar)
+
+    inflateOrCreate = ()->
+        try
+            debug 'inflating or creating', inflate
+            d = postpone()
+            if inflate? and inflate
+                if !_.isObject inflate
+                    d.yay self.createAsPromise templateName
+                    return d
+                else
+                    self.createAsPromise(templateName, inflate).then (resolved)->
+                        d.yay resolved
+                        return
+                    , bad
+                    return d
+            d.yay self.makeTemplate templateName
+
+            return d
+        catch e
+            d.nay e
+
+    instructions = []
+
+    if prefix? and _.isFunction prefix
+        debug "adding prefix function", prefix
+        instructions.push prefix
+
+    instructions.push eatFile
+
+    if suffix? and _.isFunction suffix
+        debug "adding suffix function", suffix
+        instructions.push suffix
+
+    instructions.push addAsPromise
+    instructions.push inflateOrCreate
+
+    # give back the promise
+    promise.seq(instructions).then good, bad
+    return mainDeferred
+
+___.readable 'loadRawAsPromise', (rawContent, templateName=null, inflate=false, useSugar=false)->
+    self = Crier
+    convertSugarToDust = null
+    if useSugar
+        convertSugarToDust = (input)->
+            debug "converting file", input
+            return self.convertSugarToDust(input)
+    giveRaw = ()->
+        d = new Deferred()
+        d.resolve rawContent
+        return d
+    self.loadChain giveRaw, convertSugarToDust, templateName, inflate, useSugar
+
+
 ###*
 * Read a file or files and add them to the dust.cache via 
 * @method loadFileAsPromise
@@ -231,18 +319,8 @@ ___.readable 'convertSugarToDust', (sugarContent, data, options)->
 * @param {Boolean|Object} inflate - boolean or object
 ###
 ___.readable 'loadFileAsPromise', (fileToLoad, templateName=null, inflate=false, useSugar=false)->
-    self = @
-    # make yo'self a deferred
-    mainDeferred = postpone()
-
-    good = (outcome)->
-        mainDeferred.resolve outcome
-        return
-    # right now we reuse this bad callback for all the parts of our possible logic chain
-    bad = (err)->
-        mainDeferred.reject err
-        return
-
+    self = Crier
+    convertSugarToDust = null
     # pull out a promise
     readFile = ()->
         d = postpone()
@@ -261,58 +339,9 @@ ___.readable 'loadFileAsPromise', (fileToLoad, templateName=null, inflate=false,
             charset: 'utf8'
         }).then succeed, fail
         return d
-
-    eatFile = (input)->
-        debug "eating file", input
-        d = postpone()
-        if !input?
-            d.reject new Error "File is empty."
-        else
-            output = input.toString()
-            if !output? or output.length is 0
-                d.reject new Error "File is empty."
-                return d
-            d.resolve output
-        return d
-
-    convertSugarToDust = (input)->
-        debug "converting file", input
-        return self.convertSugarToDust(input)
-
-    addAsPromise = (content)->
-        debug "adding file as promise", content
-        return self.addAsPromise(templateName, content, useSugar)
-
-    inflateOrCreate = ()->
-        try
-            debug 'inflating or creating', inflate
-            d = postpone()
-            if inflate? and inflate
-                if !_.isObject inflate
-                    d.yay self.createAsPromise templateName
-                    return d
-                else
-                    self.createAsPromise(templateName, inflate).then (resolved)->
-                        d.yay resolved
-                        return
-                    , bad
-                    return d
-            d.yay true
-            return d
-        catch e
-            d.nay e
-
-    instructions = [
-        readFile
-        eatFile
-    ]
-
-    if useSugar or (self.sugarFileType is path.extname fileToLoad)
-        instructions.push convertSugarToDust
-
-    instructions.push addAsPromise
-    instructions.push inflateOrCreate
-
-    # give back the promise
-    promise.seq(instructions).then good, bad
-    return mainDeferred
+    if useSugar
+        convertSugarToDust = (input)->
+            debug "converting file", input
+            return self.convertSugarToDust(input)
+    self.loadChain readFile, convertSugarToDust, templateName, inflate, useSugar
+    

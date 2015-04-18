@@ -41,15 +41,15 @@ path = require 'path'
                         transformed.should.equal item.output
                         finish()
 
-            describe '.convertFile', ()->
+            describe '.convertFileAsPromise', ()->
                 it "should in (jit)-mode allow for the conversion of just-in-time files which are read at runtime", (done)->
-                    harnessed = harness('convertFile')
+                    harnessed = harness('convertFileAsPromise')
                     instructions = harnessed.jit
                     finish = _.after instructions.length, done
                     _.each instructions, (item)->
                         args = item.input
                         # console.log "output", item.output
-                        conversionPromise = $.convertFile.apply $, args
+                        conversionPromise = $.convertFileAsPromise.apply $, args
                         happy = (c)->
                             c.should.equal item.output
                             finish()
@@ -58,13 +58,13 @@ path = require 'path'
                         conversionPromise.then happy, sad
 
                 it "should in (jit)-mode be able to inflate the templates with content", (done)->
-                    harnessed = harness('convertFile')
+                    harnessed = harness('convertFileAsPromise')
                     instructions = harnessed['jit-inflate']
                     finish = _.after instructions.length, done
                     _.each instructions, (item)->
                         args = item.input
                         # console.log "output", item.output
-                        conversionPromise = $.convertFile.apply $, args
+                        conversionPromise = $.convertFileAsPromise.apply $, args
                         happy = (c)->
                             c.should.equal item.output
                             finish()
@@ -73,27 +73,28 @@ path = require 'path'
                         conversionPromise.then happy, sad
 
                 it "should in (inline)-mode allow for the conversion of jade files to js templates", (done)->
-                    harnessed = harness('convertFile')
+                    harnessed = harness('convertFileAsPromise')
                     instructions = harnessed['inline']
                     finish = _.after instructions.length, done
                     _.each instructions, (item)->
                         args = item.input
                         # console.log "output", item.output
-                        conversionPromise = $.convertFile.apply $, args
+                        conversionPromise = $.convertFileAsPromise.apply $, args
                         happy = (c)->
                             JSON.stringify(c).should.equal JSON.stringify item.output
                             finish()
                         sad = (e)->
                             e.should.not.be.ok
                         conversionPromise.then happy, sad
+                        
                 it "should in (inline-convert)-mode allow for the conversion of sugar (jade & dust) files to js templates", (done)->
-                    harnessed = harness('convertFile')
+                    harnessed = harness('convertFileAsPromise')
                     instructions = harnessed['inline-convert']
                     finish = _.after instructions.length, done
                     _.each instructions, (item)->
                         args = item.input
                         # console.log "output", item.output
-                        conversionPromise = $.convertFile.apply $, args
+                        conversionPromise = $.convertFileAsPromise.apply $, args
                         happy = (c)->
                             JSON.stringify(c).should.equal JSON.stringify item.output
                             finish()
@@ -101,7 +102,7 @@ path = require 'path'
                             e.should.not.be.ok
                         conversionPromise.then happy, sad
 
-            describe 'export', ()->
+            describe 'exportAsPromise', ()->
                 it "should be able to generate raw files which contain external templates in inline-convert mode", ()->
 
 
