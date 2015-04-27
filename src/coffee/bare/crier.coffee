@@ -183,8 +183,6 @@ ___.readable 'createAsPromise', (name, object)->
         if obj? and _.isObject obj
             debug "createAsPromise: rendering and returning promise"
             content = _.extend self.locals, obj
-            console.log obj, "extending object with locals", self.locals
-            console.log "resolved", content
             render content, (error, content)->
                 if error?
                     d.reject error
