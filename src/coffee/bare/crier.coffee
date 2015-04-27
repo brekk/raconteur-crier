@@ -37,6 +37,17 @@ ___.readable 'sugarFileType', {
         return SUGAR_FILE_TYPE
 }, true
 
+___.guarded "_locals", {}
+
+___.readable 'locals', {
+    get: ()->
+        return @_locals
+    set: (obj)->
+        if !_.isObject obj
+            throw new TypeError "Expected .locals assignment to be an object."
+        @_locals = obj
+}, true
+
 ###*
 * add a named template
 * @method add
@@ -136,7 +147,8 @@ ___.readable 'create', (name, object, cb)->
     templateMaker = @makeTemplate name
     if (arguments.length is 1)
         return templateMaker
-    return templateMaker object, cb
+    content = _.extend @locals, object
+    return templateMaker content, cb
 
 ###*
 * Make a template from a named template
@@ -154,7 +166,7 @@ ___.guarded 'makeTemplate', (name)->
             throw new TypeError "Expected a callback."
             # callback = ()->
         result = dust.render name, data, callback
-        debug ".create(->): successfully rendered"
+        debug ".create(->): successfully rendered", data
         return result
 
 ###*
@@ -164,12 +176,16 @@ ___.guarded 'makeTemplate', (name)->
 * @param {Object} [object] - the optional data object 
 ###
 ___.readable 'createAsPromise', (name, object)->
+    self = @
     render = @makeTemplate name
     promisable = (obj)->
         d = postpone()
         if obj? and _.isObject obj
             debug "createAsPromise: rendering and returning promise"
-            render obj, (error, content)->
+            content = _.extend self.locals, obj
+            console.log obj, "extending object with locals", self.locals
+            console.log "resolved", content
+            render content, (error, content)->
                 if error?
                     d.reject error
                     return
