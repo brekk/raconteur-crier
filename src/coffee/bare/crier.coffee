@@ -37,17 +37,6 @@ ___.readable 'sugarFileType', {
         return SUGAR_FILE_TYPE
 }, true
 
-___.guarded "_locals", {}
-
-___.readable 'locals', {
-    get: ()->
-        return @_locals
-    set: (obj)->
-        if !_.isObject obj
-            throw new TypeError "Expected .locals assignment to be an object."
-        @_locals = obj
-}, true
-
 ###*
 * add a named template
 * @method add
@@ -147,8 +136,7 @@ ___.readable 'create', (name, object, cb)->
     templateMaker = @makeTemplate name
     if (arguments.length is 1)
         return templateMaker
-    content = _.extend @locals, object
-    return templateMaker content, cb
+    return templateMaker object, cb
 
 ###*
 * Make a template from a named template
@@ -182,8 +170,7 @@ ___.readable 'createAsPromise', (name, object)->
         d = postpone()
         if obj? and _.isObject obj
             debug "createAsPromise: rendering and returning promise"
-            content = _.extend self.locals, obj
-            render content, (error, content)->
+            render obj, (error, content)->
                 if error?
                     d.reject error
                     return
