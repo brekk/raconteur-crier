@@ -1,6 +1,6 @@
 {
   "name": "raconteur-crier",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "The Crier is a tool for converting markup (either straight HTML, jade, or jade-and-dust together, my preferred sugar syntax) into a template (a function which can be fed data and resolves itself into a view).",
   "main": "crier.js",
   "scripts": {
